@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repositories version="1.0">
+<repo priority="50" status="unofficial">
+	<name>violetina</name>
+	<description>Crapy ebuild from tina</description>
+	<homepage>https://github.com/violetina</homepage>
+	<owner>
+		<email>schizoid69@gmail.com</email>
+		<name>Tina, Cochet</name>
+	</owner>
+	<source type="git">git://github.com/violetina/gentoo-overlay.git</source>
+	<feed>https://github.com/violetina/gentoo-overlay/commits/master.atom</feed>
+</repo>
+</repositories>
