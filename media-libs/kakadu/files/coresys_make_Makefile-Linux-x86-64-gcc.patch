@@ -1,0 +1,20 @@
+--- /home/tina/v7_9-01574L/coresys/make/Makefile-Linux-x86-64-gcc	2017-01-09 06:30:28.000000000 +0100
++++ /home/tina/build_kakadu/v7_9-01574L/coresys/make/Makefile-Linux-x86-64-gcc	2017-07-28 15:12:36.000000000 +0200
+@@ -2,7 +2,7 @@ KDU_GLIBS =
+ # KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
+ 
+ CC = g++
+-
++DEFINES = -DKDU_INCLUDE_TIFF
+ # The following variables allow you to turn on/off SIMD optimizations
+ INCLUDE_SSSE3 = 1 # Comment out to avoid SSSE3; value is not important
+ INCLUDE_SSE4 = 1  # Comment out to avoid SSE4.1; value is not important
+@@ -18,7 +18,7 @@ C_OPT += -fPIC -m64
+ #C_OPT += -DKDU_CUSTOM_TEXT   # See "Internationalization" in "Compilation_Instructions.txt"
+ #C_OPT += -DKDU_NO_THREADS    # Uncomment to compile without multi-threading
+ 
+-C_OPT += -msse2 -DKDU_X86_INTRINSICS # Enables basic X86 speedups
++C_OPT += -msse2 -DKDU_X86_INTRINSICS -DKDU_INCLUDE_TIFF # Enables basic X86 speedups
+ 
+ # File-specific compilation-directives follow; these are applied to functions
+ # whose invocation is constrained by run-time CPUID tests
