@@ -22,6 +22,7 @@ DEPEND="${RDEPEND}"
 #S="${WORKDIR}/v7_9-01574L"
 PATCHES=(
 	"${FILESDIR}/use_tiff.patch"
+	"${FILESDIR}/apps_addltiff.patch"
 )
 
 SRC_URI="${DISTDIR}/kakadu-7.9.1.tar.gz"

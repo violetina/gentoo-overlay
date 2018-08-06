@@ -1,18 +1,3 @@
-diff --git a/apps/make/Makefile-Linux-x86-64-gcc b/apps/make/Makefile-Linux-x86-64-gcc
-index 6f4886a..9fcf5bf 100644
---- a/apps/make/Makefile-Linux-x86-64-gcc
-+++ b/apps/make/Makefile-Linux-x86-64-gcc
-@@ -1,8 +1,8 @@
--KDU_GLIBS =
-+KDU_GLIBS =  
- # KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
- 
- CC = g++
--
-+DEFINES = -DKDU_INCLUDE_TIFF
- # The following variables allow you to turn on/off SIMD optimizations
- INCLUDE_SSSE3 = 1 # Comment out to avoid SSSE3; value is not important
- INCLUDE_SSE4 = 1  # Comment out to avoid SSE4.1; value is not important
 diff --git a/coresys/make/Makefile-Linux-x86-64-gcc b/coresys/make/Makefile-Linux-x86-64-gcc
 index 25d12f5..6a2497b 100644
 --- a/coresys/make/Makefile-Linux-x86-64-gcc
