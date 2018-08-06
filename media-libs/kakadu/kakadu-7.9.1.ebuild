@@ -14,8 +14,8 @@ KEYWORDS="amd64"
 IUSE=""
 
 RESTRICT=fetch
-RDEPEND="media-libs/tiff
-	virtual/jdk"
+RDEPEND="media-libs/tiff"
+#	virtual/jdk"
 DEPEND="${RDEPEND}"
 
 #S=${WORKDIR}/${P}
