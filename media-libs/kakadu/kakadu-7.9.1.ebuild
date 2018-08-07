@@ -11,16 +11,17 @@ HOMEPAGE="http://kakadusoftware.com/"
 LICENSE="closed source"
 SLOT="0"
 KEYWORDS="amd64"
-IUSE="-static-libs"
+IUSE="-static-libs -tiff"
+REQUIRED_USE="tiff? ( !static-libs )"
 RESTRICT=fetch
-RDEPEND="media-libs/tiff[static-libs?,zlib,lzma,jpeg]"
+RDEPEND="tiff? ( media-libs/tiff )"
 DEPEND="${RDEPEND}"
 
 #S=${WORKDIR}/${P}
 #S="${WORKDIR}/v7_9-01574L"
 PATCHES=(
-	"${FILESDIR}/use_tiff.patch"
-	"${FILESDIR}/apps_addltiff.patch"
+#	"${FILESDIR}/use_tiff.patch"
+#	"${FILESDIR}/apps_addltiff.patch"
 )
 
 SRC_URI="${DISTDIR}/kakadu-7.9.1.tar.gz"
@@ -35,6 +36,8 @@ src_prepare() {
 #        mv make/Makefile-Linux-x86-64-gcc make/Makefile || die
 	cp "${FILESDIR}/Makefile" Makefile
 	use static-libs && epatch "${FILESDIR}/use_static.patch"
+        use tiff && epatch "${FILESDIR}/use_tiff.patch"
+
 }
 
 #src_configure() {

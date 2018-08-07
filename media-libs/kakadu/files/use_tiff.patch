@@ -1,23 +1,34 @@
-diff --git a/coresys/make/Makefile-Linux-x86-64-gcc b/coresys/make/Makefile-Linux-x86-64-gcc
-index 25d12f5..6a2497b 100644
---- a/coresys/make/Makefile-Linux-x86-64-gcc
-+++ b/coresys/make/Makefile-Linux-x86-64-gcc
-@@ -2,7 +2,7 @@ KDU_GLIBS =
+diff --git a/apps/make/Makefile-Linux-x86-64-gcc b/apps/make/Makefile-Linux-x86-64-gcc
+index 6f4886a..49d42fe 100644
+--- a/apps/make/Makefile-Linux-x86-64-gcc
++++ b/apps/make/Makefile-Linux-x86-64-gcc
+@@ -1,4 +1,8 @@
+ KDU_GLIBS =
++KDU_GLIBS = -DKDU_INCLUDE_TIFF
++
++DEFINES = -DKDU_INCLUDE_TIFF
++
  # KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
  
  CC = g++
--
+@@ -52,7 +56,7 @@ endif
+ 
+ CFLAGS = $(INCLUDES) $(C_OPT)
+ 
+-LIBS = -lm -lpthread # You may comment out "-lpthreads" if coresys was
++LIBS = -lm -lpthread -ltiff # You may comment out "-lpthreads" if coresys was
+                      # built using -DKDU_NO_THREADS
+ NETLIBS =
+ 
+diff --git a/coresys/make/Makefile-Linux-x86-64-gcc b/coresys/make/Makefile-Linux-x86-64-gcc
+index 25d12f5..2d1689a 100644
+--- a/coresys/make/Makefile-Linux-x86-64-gcc
++++ b/coresys/make/Makefile-Linux-x86-64-gcc
+@@ -1,5 +1,6 @@
+-KDU_GLIBS =
++KDU_GLIBS = -DKDU_INCLUDE_TIFF
+ # KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
 +DEFINES = -DKDU_INCLUDE_TIFF
- # The following variables allow you to turn on/off SIMD optimizations
- INCLUDE_SSSE3 = 1 # Comment out to avoid SSSE3; value is not important
- INCLUDE_SSE4 = 1  # Comment out to avoid SSE4.1; value is not important
-@@ -18,7 +18,7 @@ C_OPT += -fPIC -m64
- #C_OPT += -DKDU_CUSTOM_TEXT   # See "Internationalization" in "Compilation_Instructions.txt"
- #C_OPT += -DKDU_NO_THREADS    # Uncomment to compile without multi-threading
  
--C_OPT += -msse2 -DKDU_X86_INTRINSICS # Enables basic X86 speedups
-+C_OPT += -msse2 -DKDU_X86_INTRINSICS -DKDU_INCLUDE_TIFF # Enables basic X86 speedups
+ CC = g++
  
- # File-specific compilation-directives follow; these are applied to functions
- # whose invocation is constrained by run-time CPUID tests
-
