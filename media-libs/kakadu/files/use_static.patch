@@ -1,0 +1,33 @@
+diff --git a/apps/make/Makefile-Linux-x86-64-gcc b/apps/make/Makefile-Linux-x86-64-gcc
+index 3e8d306..e4595b5 100644
+--- a/apps/make/Makefile-Linux-x86-64-gcc
++++ b/apps/make/Makefile-Linux-x86-64-gcc
+@@ -1,5 +1,5 @@
+ KDU_GLIBS = -DKDU_INCLUDE_TIFF
+-# KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
++KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
+ DEFINES = -DKDU_INCLUDE_TIFF
+ 
+ CC = g++
+@@ -63,7 +63,8 @@ LIB_DIR = ../../lib/Linux-x86-64-gcc
+ STATIC_LIB_SRC = libkdu.a
+ SHARED_LIB_SRC = libkdu_v79R.so
+ 
+-LIB_SRC = $(SHARED_LIB_SRC) # Change to $(STATIC_LIB_SRC) for static linking
+-LIB_IMPORTS = 
++#LIB_SRC = $(SHARED_LIB_SRC) # Change to $(STATIC_LIB_SRC) for static linking
++LIB_SRC = $(STATIC_LIB_SRC)
++LIB_IMPORTS =
+ 
+ include Targets.mk
+diff --git a/coresys/make/Makefile-Linux-x86-64-gcc b/coresys/make/Makefile-Linux-x86-64-gcc
+index 6a2497b..975b23e 100644
+--- a/coresys/make/Makefile-Linux-x86-64-gcc
++++ b/coresys/make/Makefile-Linux-x86-64-gcc
+@@ -1,5 +1,5 @@
+ KDU_GLIBS =
+-# KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
++KDU_GLIBS += -static -static-libgcc # Uncomment this to get a static build
+ 
+ CC = g++
+ DEFINES = -DKDU_INCLUDE_TIFF

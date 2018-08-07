@@ -3,7 +3,7 @@
 
 EAPI="6"
 
-inherit vcs-snapshot #eutils
+inherit vcs-snapshot eutils
 
 DESCRIPTION="Jpeg2000 Image Tools"
 HOMEPAGE="http://kakadusoftware.com/"
@@ -11,11 +11,9 @@ HOMEPAGE="http://kakadusoftware.com/"
 LICENSE="closed source"
 SLOT="0"
 KEYWORDS="amd64"
-IUSE=""
-
+IUSE="-static-libs"
 RESTRICT=fetch
-RDEPEND="media-libs/tiff"
-#	virtual/jdk"
+RDEPEND="media-libs/tiff[static-libs?,zlib,lzma,jpeg]"
 DEPEND="${RDEPEND}"
 
 #S=${WORKDIR}/${P}
@@ -36,6 +34,7 @@ src_prepare() {
 	sed -i 'i2 DEFINES = -DKDU_INCLUDE_TIFF' make/Makefile-Linux-x86-64-gcc || die
 #        mv make/Makefile-Linux-x86-64-gcc make/Makefile || die
 	cp "${FILESDIR}/Makefile" Makefile
+	use static-libs && epatch "${FILESDIR}/use_static.patch"
 }
 
 #src_configure() {
