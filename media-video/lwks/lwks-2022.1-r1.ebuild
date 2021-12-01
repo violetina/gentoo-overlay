@@ -82,23 +82,23 @@ src_install() {
 	domenu usr/share/applications/lightworks.desktop
 	doicon usr/share/lightworks/Icons/App.png
 	
-	insinto /usr/lib64/${PN}
-	doins -r usr/lib/${PN}/* || die "doins lib failed"
+	insinto /usr/lib64/lightworks
+	doins -r usr/lib/lightworks/* || die "doins lib failed"
 
-	exeinto /usr/lib64/${PN}
-	doexe usr/lib/${PN}/ntcardvt || die "doins lib-exe failed"
+	exeinto /usr/lib64/lightworks
+	doexe usr/lib/lightworks/ntcardvt || die "doins lib-exe failed"
 
 	fperms a+rw "usr/share/lightworks/Preferences"
 	fperms a+rw "usr/share/lightworks/Audio Mixes"
 
-	insinto /usr/share/${PN}
-	doins -r usr/share/${PN}/* || die "doins share failed"
+	insinto /usr/share/lightworks
+	doins -r usr/share/lightworks/* || die "doins share failed"
 
 	insinto /usr/share/fonts
 	doins -r usr/share/fonts/* || die "doins fonts failed"
 	mkfontdir "${D}/usr/share/fonts/truetype"
 
-	dodoc usr/share/doc/${PN}/*
+	dodoc usr/share/doc/lightworks/*
 }
 
 
