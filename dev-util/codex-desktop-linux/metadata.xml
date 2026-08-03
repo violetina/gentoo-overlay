@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>schizoid69@gmail.com</email>
+		<name>Tina</name>
+	</maintainer>
+	<longdescription>
+		Downloads OpenAI's official Codex/ChatGPT Desktop macOS app and repackages
+		it as a native Linux Electron app. This ebuild does not redistribute any
+		OpenAI binary; install.sh fetches Codex.dmg fresh from OpenAI at build
+		time. You need your own authorized access to Codex Desktop.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">ilysenko/codex-desktop-linux</remote-id>
+	</upstream>
+</pkgmetadata>
