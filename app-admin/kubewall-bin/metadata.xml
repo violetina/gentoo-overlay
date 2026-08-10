@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>schizoid69@gmail.com</email>
+		<name>Tina</name>
+	</maintainer>
+	<longdescription>
+		Prebuilt release binary of kubewall, a web UI for browsing/managing
+		Kubernetes cluster resources across multiple kubeconfig contexts.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">kubewall/kubewall</remote-id>
+	</upstream>
+</pkgmetadata>
