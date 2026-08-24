@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Python Fire generates command line interfaces from any Python object: a
+    module, class, dict, function or object instance. Packaged here because
+    app-misc/hermes-agent imports it unconditionally and it is not in ::gentoo.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">fire</remote-id>
+    <remote-id type="github">google/python-fire</remote-id>
+  </upstream>
+</pkgmetadata>

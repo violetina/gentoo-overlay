@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    The official Python client for the OpenAI REST API, providing sync and
+    async access to the Chat Completions, Responses, Embeddings and Realtime
+    endpoints. Held at the 2.x series: app-misc/hermes-agent is the only
+    consumer in this overlay and targets the 2.x API surface.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">openai</remote-id>
+    <remote-id type="github">openai/openai-python</remote-id>
+  </upstream>
+</pkgmetadata>
