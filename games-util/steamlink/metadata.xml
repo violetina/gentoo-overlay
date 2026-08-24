@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pkgmetadata>
+  <maintainer type="person">
+    <email>violetina@meemoo.be</email>
+    <name>Violetina</name>
+  </maintainer>
+  <upstream>
+    <remote-id type="steam">353380</remote-id>
+    <remote-id type="github">flathub/com.valvesoftware.SteamLink</remote-id>
+  </upstream>
+</pkgmetadata>

@@ -1,63 +1,78 @@
-# Copyright 1999-2016 Gentoo Foundation
-# Distributed under the terms of the GNU General Public License v2
-# Depends: libgtk-3-0, libnotify4, libnss3, libxss1, libxtst6, xdg-utils, libatspi2.0-0, libuuid1, libappindicator3-1, libsecret-1-0
+EAPI=8
 
-EAPI=7
+inherit desktop unpacker xdg
 
-inherit eutils pax-utils gnome2-utils xdg-utils
-# 2022.5.0
-# https://github.com/Kong/insomnia/releases/download/core%402022.5.0/Insomnia.Core-2022.5.0.tar.gz
-DESCRIPTION="The most intuitive cross-platform REST API Client"
+DESCRIPTION="Cross-platform REST/GraphQL/gRPC API client"
 HOMEPAGE="https://insomnia.rest/"
-SRC_URI="https://github.com/Kong/insomnia/releases/download/core%40${PV}/Insomnia.Core-${PV}.deb"
-#LICENSE="Insomnia"
-RESTRICT="mirror"
+SRC_URI="https://github.com/Kong/insomnia/releases/download/core@${PV}/Insomnia.Core-${PV}.deb -> ${P}.deb"
 
+LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE=""
+RESTRICT="mirror strip"
 
-
-DEPEND=""
 RDEPEND="
-	gnome-base/gconf
-        x11-libs/gtk+:3
-        app-crypt/libsecret
-        dev-python/pyatspi
-        x11-misc/xdg-utils
-	x11-libs/libnotify
-	dev-libs/libappindicator
-	x11-libs/libXtst
+	app-accessibility/at-spi2-core
+	dev-libs/libappindicator:3
 	dev-libs/nss
+	media-libs/alsa-lib
+	net-print/cups
+	sys-apps/dbus
+	x11-libs/gtk+:3
+	x11-libs/libX11
+	x11-libs/libXcursor
+	x11-libs/libXdamage
+	x11-libs/libXext
+	x11-libs/libXfixes
+	x11-libs/libXi
+	x11-libs/libXrandr
+	x11-libs/libXrender
+	x11-libs/libXScrnSaver
+	x11-libs/libXtst
+	x11-misc/xdg-utils
+	virtual/libudev:0
 "
 
 S="${WORKDIR}"
+QA_PREBUILT="opt/Insomnia/*"
 
 src_unpack() {
-	ar x "${DISTDIR}/${A}" || die
-	unpack "${WORKDIR}/data.tar.xz"
+	unpack_deb "${A}"
 }
 
-
 src_install() {
-	unpack usr/share/doc/insomnia/*.gz
-	dodoc changelog
+	local appdir="/opt/Insomnia"
 
-	insinto /usr/share
-	doins -r usr/share/icons
-	doins -r usr/share/applications
+	insinto "${appdir}"
+	doins -r opt/Insomnia/.
+	fperms 0755 "${appdir}/insomnia"
 
-	cp -a opt "${D}" || die
-	pax-mark rm "${ED}/opt/Insomnia/insomnia"
-	make_wrapper "${PN}" "/opt/Insomnia/insomnia"
+	cat <<EOS > "${T}/${PN}"
+#!/bin/sh
+exec ${appdir}/insomnia "$@"
+EOS
+	fperms 0755 "${T}/${PN}"
+	newbin "${T}/${PN}" "${PN}"
+
+	domenu usr/share/applications/insomnia.desktop
+
+	if [[ -d usr/share/icons ]]; then
+		insinto /usr/share
+		doins -r usr/share/icons
+	fi
+
+	local changelog="usr/share/doc/insomnia/changelog.gz"
+	if [[ -f ${changelog} ]]; then
+		gunzip -c "${changelog}" > "${T}/changelog"
+		docompress -x /usr/share/doc/${PF}/changelog
+		dodoc "${T}/changelog"
+	fi
 }
 
 pkg_postinst() {
-    gnome2_icon_cache_update
-    xdg_desktop_database_update
+	xdg_pkg_postinst
 }
 
 pkg_postrm() {
-    gnome2_icon_cache_update
-    xdg_desktop_database_update
+	xdg_pkg_postrm
 }

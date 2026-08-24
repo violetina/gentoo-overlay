@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Hermes Agent is a self-improving AI assistant that orchestrates skills, cron jobs,
+    messaging gateways, and providers. Upstream ships it via a shell installer, a
+    Docker image or Nix; this ebuild builds it as a normal Python package against
+    the interpreter and dependencies in the tree, and installs the bundled locale,
+    skill and MCP-catalog trees under /usr/share/hermes-agent, wired up through
+    /etc/env.d/99hermes-agent.
+  </longdescription>
+  <use>
+    <flag name="tui">Build the Ink/React terminal UI (esbuild bundle). Requires
+      network access during src_compile for 'npm ci', so it lifts
+      network-sandbox.</flag>
+    <flag name="web">Build the Vite/React web dashboard. Requires network access
+      during src_compile for 'npm ci', so it lifts network-sandbox.</flag>
+  </use>
+  <upstream>
+    <remote-id type="github">NousResearch/hermes-agent</remote-id>
+  </upstream>
+</pkgmetadata>
