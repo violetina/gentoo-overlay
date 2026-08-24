@@ -1,0 +1,69 @@
+Fix DaemonThreadPoolExecutor on Python 3.14.
+
+tools/daemon_pool.py reimplements ThreadPoolExecutor._adjust_thread_count to
+get daemon workers that are not registered in
+concurrent.futures.thread._threads_queues, so a wedged worker cannot hold
+interpreter exit open. Its own comment says it "Mirrors CPython's
+implementation (3.8-3.13)" -- and that is the problem: 3.14 replaced the
+executor's _initializer/_initargs attributes with a per-worker context
+factory built in prepare_context(), and reordered _worker's parameters from
+(executor_reference, work_queue, initializer, initargs) to
+(executor_reference, ctx, work_queue).
+
+On 3.14 the mirrored code therefore raises
+
+  AttributeError: 'DaemonThreadPoolExecutor' object has no attribute '_initializer'
+
+on the first submit, which takes out every concurrent tool call (terminal,
+read_file, search_files, execute_code, todo) since they all run through this
+pool.
+
+Upstream caps requires-python at <3.14 rather than supporting it, so this is
+not fixed upstream. Branch on sys.version_info instead of picking one API, so
+the module keeps working on the 3.12/3.13 targets in PYTHON_COMPAT.
+
+Not upstreamable as-is while their supported range excludes 3.14.
+
+--- a/tools/daemon_pool.py	2026-08-24 14:36:23.077200399 +0200
++++ b/tools/daemon_pool.py	2026-08-24 14:36:23.077796844 +0200
+@@ -26,6 +26,7 @@
+ 
+ from __future__ import annotations
+ 
++import sys
+ import threading
+ import weakref
+ from concurrent.futures import ThreadPoolExecutor
+@@ -49,15 +50,27 @@
+         num_threads = len(self._threads)
+         if num_threads < self._max_workers:
+             thread_name = "%s_%d" % (self._thread_name_prefix or self, num_threads)
+-            t = threading.Thread(
+-                name=thread_name,
+-                target=_worker,
+-                args=(
++            if sys.version_info >= (3, 14):
++                # 3.14 moved initializer/initargs behind a per-worker context
++                # factory (prepare_context) and reordered _worker's params to
++                # (executor_reference, ctx, work_queue). Reading
++                # self._initializer here raises AttributeError on 3.14.
++                args = (
++                    weakref.ref(self, weakref_cb),
++                    self._create_worker_context(),
++                    self._work_queue,
++                )
++            else:
++                args = (
+                     weakref.ref(self, weakref_cb),
+                     self._work_queue,
+                     self._initializer,
+                     self._initargs,
+-                ),
++                )
++            t = threading.Thread(
++                name=thread_name,
++                target=_worker,
++                args=args,
+                 daemon=True,
+             )
+             t.start()

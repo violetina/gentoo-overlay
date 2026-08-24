@@ -129,6 +129,18 @@ BDEPEND="
 
 S="${WORKDIR}/${PN}-${MY_PV}"
 
+PATCHES=(
+	# DaemonThreadPoolExecutor mirrors CPython's pre-3.14
+	# _adjust_thread_count and reads self._initializer, which 3.14 removed in
+	# favour of a per-worker context factory. Every concurrent tool call --
+	# terminal, read_file, search_files, execute_code, todo -- goes through
+	# that pool, so on 3.14 they all failed with
+	# "'DaemonThreadPoolExecutor' object has no attribute '_initializer'".
+	# This is the concrete reason upstream caps requires-python at <3.14; the
+	# cap is widened in src_prepare, so we own the fallout.
+	"${FILESDIR}"/${P}-py314-daemon-pool.patch
+)
+
 # ${WORKDIR}/npm, not ${WORKDIR}/package: the npm tarball unpacks to
 # package/, which would collide with anything else doing the same.
 NPM_DIR="${WORKDIR}/npm"
@@ -187,7 +199,10 @@ src_prepare() {
 			die "failed to unpin ${spec} in lazy_deps.py"
 	done
 
-	default
+	# distutils-r1_src_prepare rather than plain default: it applies PATCHES
+	# and eapply_user the same way, then runs the distutils-specific prep
+	# that a bare `default` skips.
+	distutils-r1_src_prepare
 }
 
 python_compile() {
