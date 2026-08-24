@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    OTLP-over-HTTP span/metric/log exporter. Packaged for
+    app-misc/hermes-agent's gateway health export.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">opentelemetry-exporter-otlp-proto-http</remote-id>
+    <remote-id type="github">open-telemetry/opentelemetry-python</remote-id>
+  </upstream>
+</pkgmetadata>

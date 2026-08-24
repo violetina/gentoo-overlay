@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Azure Entra ID credential classes (DefaultAzureCredential, managed
+    identity, workload identity, client secret/certificate). Packaged for
+    app-misc/hermes-agent's Azure provider.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">azure-identity</remote-id>
+    <remote-id type="github">Azure/azure-sdk-for-python</remote-id>
+  </upstream>
+</pkgmetadata>

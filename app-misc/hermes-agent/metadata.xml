@@ -14,6 +14,10 @@
     /etc/env.d/99hermes-agent.
   </longdescription>
   <use>
+    <flag name="azure">Enable the Azure Entra ID provider (dev-python/azure-identity).</flag>
+    <flag name="firecrawl">Enable the Firecrawl web-search backend (dev-python/firecrawl-py).</flag>
+    <flag name="otlp">Enable OTLP-over-HTTP monitoring export (opentelemetry-sdk plus the
+      proto-http exporter).</flag>
     <flag name="tui">Build the Ink/React terminal UI (esbuild bundle). Requires
       network access during src_compile for 'npm ci', so it lifts
       network-sandbox.</flag>

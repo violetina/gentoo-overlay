@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Python SDK for the Firecrawl scraping/crawling API. Packaged for
+    app-misc/hermes-agent's firecrawl search backend, which upstream lazily
+    pip-installs -- unworkable against a distro install.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">firecrawl-py</remote-id>
+    <remote-id type="github">firecrawl/firecrawl</remote-id>
+  </upstream>
+</pkgmetadata>

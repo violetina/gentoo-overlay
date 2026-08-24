@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Shared pipeline, transport and exception plumbing for the Azure SDK for
+    Python. Pulled in by dev-python/azure-identity.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">azure-core</remote-id>
+    <remote-id type="github">Azure/azure-sdk-for-python</remote-id>
+  </upstream>
+</pkgmetadata>

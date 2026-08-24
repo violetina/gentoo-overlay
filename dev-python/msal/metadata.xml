@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Microsoft Authentication Library: acquires tokens from Microsoft Entra ID
+    for Azure SDK clients.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">msal</remote-id>
+    <remote-id type="github">AzureAD/microsoft-authentication-library-for-python</remote-id>
+  </upstream>
+</pkgmetadata>

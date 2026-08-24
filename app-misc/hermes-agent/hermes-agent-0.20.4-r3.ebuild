@@ -35,7 +35,7 @@ SRC_URI="
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
-IUSE="+tui +web"
+IUSE="+azure +firecrawl +otlp +tui +web"
 
 RESTRICT="
 	web? ( network-sandbox )
@@ -101,6 +101,27 @@ RDEPEND="$(python_gen_cond_dep '
 RDEPEND+="
 	tui? ( >=net-libs/nodejs-22.22.0 )
 "
+# Optional features that upstream lazily pip-installs from tools/lazy_deps.py.
+# That mechanism cannot work here (site-packages is not user-writable), so each
+# one becomes a USE flag instead. Enabling a flag only makes the feature
+# *available* -- it still has to be selected in the Hermes config.
+#
+# Versions are the tree's, not lazy_deps.py's pins. The one place that matters:
+# opentelemetry releases api/sdk/proto/exporter in lockstep and the exporter
+# requires an exact-matching proto, so this follows ::gentoo's
+# opentelemetry-sdk (1.44.x) rather than lazy_deps.py's 1.39.1.
+RDEPEND+="$(python_gen_cond_dep '
+	azure? (
+		dev-python/azure-identity[${PYTHON_USEDEP}]
+	)
+	firecrawl? (
+		dev-python/firecrawl-py[${PYTHON_USEDEP}]
+	)
+	otlp? (
+		dev-python/opentelemetry-exporter-otlp-proto-http[${PYTHON_USEDEP}]
+		dev-python/opentelemetry-sdk[${PYTHON_USEDEP}]
+	)
+')"
 BDEPEND="
 	web? ( >=net-libs/nodejs-22.22.0 )
 	tui? ( >=net-libs/nodejs-22.22.0 )
@@ -136,6 +157,35 @@ src_prepare() {
 	# is the package manager's job here. Inert under portage (setuptools never
 	# reads [tool.uv]) but keeps the tree honest about intent.
 	sed -i '/^exclude-newer/d' pyproject.toml || die "failed to relax uv exclude-newer"
+
+	# tools/lazy_deps.py gates every optional feature on an EXACT pin: its
+	# _is_satisfied() compares the installed version against "==X.Y.Z" and
+	# ensure() raises FeatureUnavailable on any mismatch, even when the
+	# package is installed and importable. That is right for its own
+	# pip-installs-on-demand model and wrong here, where portage owns
+	# versions and cannot always match the pin -- the opentelemetry stack is
+	# the live example: the tree ships 1.44.x, upstream pins 1.39.1, and the
+	# OTLP exporter needs an exact-matching opentelemetry-proto, so matching
+	# the pin would mean shadowing ::gentoo's opentelemetry-{api,sdk,
+	# semantic-conventions}.
+	#
+	# Strip the constraint from just the specs RDEPEND satisfies.
+	# _is_satisfied() documents a bare name as presence-only ("no version
+	# constraint, presence is enough"), which is exactly the check we want --
+	# the ebuild has already fixed the versions. Every other feature keeps
+	# its pin and its lazy-install behaviour.
+	local spec
+	local -a unpin=( anthropic )
+	use azure && unpin+=( azure-identity )
+	use firecrawl && unpin+=( firecrawl-py )
+	use otlp && unpin+=( opentelemetry-sdk opentelemetry-exporter-otlp-proto-http )
+	for spec in "${unpin[@]}"; do
+		grep -q "\"${spec}==" tools/lazy_deps.py ||
+			die "no pinned ${spec} spec in lazy_deps.py -- did upstream restructure LAZY_DEPS?"
+		sed -i -e "s/\"${spec}==[^\"]*\"/\"${spec}\"/g" tools/lazy_deps.py || die
+		grep -q "\"${spec}\"" tools/lazy_deps.py ||
+			die "failed to unpin ${spec} in lazy_deps.py"
+	done
 
 	default
 }

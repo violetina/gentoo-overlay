@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    Generated Python protobuf bindings for the OpenTelemetry protocol (OTLP).
+    Built from the same opentelemetry-python monorepo tarball as ::gentoo's
+    opentelemetry-api / -sdk / -semantic-conventions.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">opentelemetry-proto</remote-id>
+    <remote-id type="github">open-telemetry/opentelemetry-python</remote-id>
+  </upstream>
+</pkgmetadata>
