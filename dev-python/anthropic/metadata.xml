@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    The official Python client for the Anthropic API (Claude models), providing
+    sync and async access to the Messages and Batches endpoints. Held at the
+    0.87.x series: app-misc/hermes-agent pins it there, and 1.0.0 moved to
+    dev-python/httpx2.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">anthropic</remote-id>
+    <remote-id type="github">anthropics/anthropic-sdk-python</remote-id>
+  </upstream>
+</pkgmetadata>

@@ -57,7 +57,15 @@ RESTRICT="
 # dev-python/openai and dev-python/fire are unconditional core imports and
 # are not in ::gentoo; they live in this overlay alongside dev-python/jiter,
 # which openai needs.
+#
+# dev-python/anthropic is upstream's `provider.anthropic` extra rather than a
+# core dependency: tools/lazy_deps.py pip-installs it on demand. That cannot
+# work against a distro install (site-packages is not user-writable), and the
+# default model is a Claude one, so an install without it dies at
+# "Failed to initialize agent: The 'anthropic' package is required". Hard
+# dependency here.
 RDEPEND="$(python_gen_cond_dep '
+	dev-python/anthropic[${PYTHON_USEDEP}]
 	dev-python/certifi[${PYTHON_USEDEP}]
 	dev-python/croniter[${PYTHON_USEDEP}]
 	>=dev-python/cryptography-50.0.0[${PYTHON_USEDEP}]
@@ -168,6 +176,9 @@ src_compile() {
 		# monorepo layout; override it so the output stays under web/.
 		node ../node_modules/vite/bin/vite.js build --outDir dist ||
 			die "web vite build failed"
+		# Named for its install location so a plain `doins -r` lands it as
+		# hermes_cli/web_dist without a second copy.
+		mv dist web_dist || die
 		cd "${S}" || die
 	fi
 
@@ -176,6 +187,38 @@ src_compile() {
 		# esbuild bundles everything into a single dist/entry.js; must run
 		# from the workspace root where node_modules/ lives.
 		node ui-tui/scripts/build.mjs || die "TUI esbuild failed"
+
+		# _find_bundled_tui() looks for hermes_cli/tui_dist/entry.js -- a bare
+		# entry.js, not nix's ui-tui/dist/ layout. package.json rides along so
+		# the ESM bundle does not depend on Node's module-syntax
+		# auto-detection (fine on Node 26, not on every >=22.22.0 we allow).
+		mkdir -p ui-tui/tui_dist || die
+		cp ui-tui/dist/entry.js ui-tui/tui_dist/ || die
+		cp ui-tui/package.json ui-tui/tui_dist/ || die
+	fi
+}
+
+python_install() {
+	distutils-r1_python_install
+
+	# Install the frontends where the code looks for them with no environment
+	# set at all: hermes_cli/web_dist and hermes_cli/tui_dist. Using
+	# HERMES_WEB_DIST / HERMES_TUI_DIR from env.d instead would only work in
+	# login shells -- a plain `hermes dashboard` from a non-login shell, a
+	# cron job or a systemd unit got "Frontend not built" because WEB_DIST
+	# fell back to hermes_cli/web_dist and nothing was there. Both env vars
+	# still work as overrides; they are simply no longer load-bearing.
+	local sitedir
+	sitedir=$(python_get_sitedir) || die
+
+	if use web; then
+		insinto "${sitedir}/hermes_cli"
+		doins -r web/web_dist
+	fi
+
+	if use tui; then
+		insinto "${sitedir}/hermes_cli"
+		doins -r ui-tui/tui_dist
 	fi
 }
 
@@ -198,6 +241,10 @@ python_install_all() {
 	# optional-mcps lookups take a caller-supplied `default` argument (every
 	# caller passes a source-checkout path), which wins over the fallback we
 	# could patch. Only the env var takes precedence over that default.
+	#
+	# The asset trees genuinely need this. The frontends do not -- they go
+	# into the package tree in python_install and resolve with no environment
+	# at all. See the comment there.
 	local envd="${T}/99hermes-agent"
 	cat > "${envd}" <<-EOF || die
 		HERMES_BUNDLED_LOCALES="${EPREFIX}/usr/share/hermes-agent/locales"
@@ -207,26 +254,27 @@ python_install_all() {
 	EOF
 
 	if use web; then
-		# Renamed rather than doins'd into a differently-named insinto:
-		# keeps the whole tree (including any dotfiles) in one copy.
-		mv web/dist web/web_dist || die
-		insinto /usr/share/hermes-agent
-		doins -r web/web_dist
-		echo "HERMES_WEB_DIST=\"${EPREFIX}/usr/share/hermes-agent/web_dist\"" \
+		# Pointed at the copy python_install just placed, not a second copy.
+		#
+		# Not redundant with that install: `hermes dashboard` builds the SPA
+		# unless HERMES_WEB_DIST is set or --skip-build is passed, and
+		# _build_web_ui() needs a web/ checkout that an installed package
+		# does not have. With this set, a login shell needs no flag; without
+		# it (non-login shell, cron, systemd) --skip-build still finds the
+		# package-tree copy, which is the case that used to 404.
+		local sitedir
+		sitedir=$(python_get_sitedir) || die
+		echo "HERMES_WEB_DIST=\"${sitedir#"${D}"}/hermes_cli/web_dist\"" \
 			>> "${envd}" || die
 	fi
 
 	if use tui; then
-		# Layout mirrors nix's $out/ui-tui: dist/entry.js plus the
-		# package.json that gives node the "type": "module" resolution it
-		# needs to run entry.js.
-		insinto /usr/share/hermes-agent/ui-tui
-		doins ui-tui/package.json
-		doins -r ui-tui/dist
-		{
-			echo "HERMES_TUI_DIR=\"${EPREFIX}/usr/share/hermes-agent/ui-tui\""
-			echo "HERMES_NODE=\"${EPREFIX}/usr/bin/node\""
-		} >> "${envd}" || die
+		# A hint, not a requirement: _node_bin() falls back to
+		# find_node_executable(), which finds /usr/bin/node on PATH. It only
+		# matters when a broken Hermes-managed Node tree exists in
+		# HERMES_HOME, where that fallback returns None rather than the
+		# system one.
+		echo "HERMES_NODE=\"${EPREFIX}/usr/bin/node\"" >> "${envd}" || die
 	fi
 
 	doenvd "${envd}"
@@ -249,8 +297,16 @@ pkg_postinst() {
 	elog ""
 	elog "Those env vars take precedence over a source checkout's own asset"
 	elog "trees. If you also develop against a hermes-agent git clone, unset"
-	elog "HERMES_BUNDLED_*, HERMES_OPTIONAL_* and HERMES_TUI_DIR in that shell."
+	elog "HERMES_BUNDLED_* and HERMES_OPTIONAL_* in that shell."
 	elog ""
+	if use web || use tui; then
+		elog "The$(usev web ' web dashboard')$(usev tui ' TUI') needs no"
+		elog "environment: it is installed inside the Python package tree, so"
+		elog "'hermes dashboard' works from any shell. Pass --skip-build to"
+		elog "the dashboard so it serves that build instead of trying to run"
+		elog "'npm run build' against a web/ checkout that is not installed."
+		elog ""
+	fi
 	elog "Hermes Agent expects many optional providers and skills." \
 		"Ensure the corresponding Python packages are installed."
 }
