@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>tina@meemoo.be</email>
+    <name>Tina Violet</name>
+  </maintainer>
+  <longdescription lang="en">
+    A fast iterable JSON parser written in Rust with PyO3 bindings, by the
+    pydantic authors. Pulled in as a hard dependency of dev-python/openai.
+    Note that dev-python/pydantic vendors the jiter Rust *crate* for
+    pydantic-core; this package is the separate Python extension module and
+    the two do not collide.
+  </longdescription>
+  <upstream>
+    <remote-id type="pypi">jiter</remote-id>
+    <remote-id type="github">pydantic/jiter</remote-id>
+  </upstream>
+</pkgmetadata>
