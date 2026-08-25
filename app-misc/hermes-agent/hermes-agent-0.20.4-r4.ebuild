@@ -35,7 +35,7 @@ SRC_URI="
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
-IUSE="+azure +firecrawl +otlp +tui +web"
+IUSE="+azure +firecrawl +mcp +otlp +tui +web"
 
 RESTRICT="
 	web? ( network-sandbox )
@@ -110,12 +110,36 @@ RDEPEND+="
 # opentelemetry releases api/sdk/proto/exporter in lockstep and the exporter
 # requires an exact-matching proto, so this follows ::gentoo's
 # opentelemetry-sdk (1.44.x) rather than lazy_deps.py's 1.39.1.
+#
+# mcp: the `mcp` extra in pyproject.toml -- the Model Context Protocol client
+# SDK, needed for `hermes mcp login <server>` against any MCP server that
+# uses the streamable-http/SSE transport (e.g. the Atlassian remote MCP) and
+# for the computer_use tool's stdio client to cua-driver. Without it, tools
+# that import mcp.client.* fail with "No module named 'mcp'" or, if a stale
+# mcp is present without its client submodules, "mcp.client.streamable_http
+# is not available."
+#
+# dev-python/mcp is not in ::gentoo; it lives in GURU (dev-python/mcp,
+# ~amd64) along with two of its own deps that are likewise GURU-only:
+# dev-python/httpx-sse and dev-python/sse-starlette. Enabling this flag
+# requires the guru overlay enabled (`eselect repository enable guru`) and
+# package.accept_keywords entries for those three atoms, since GURU ships
+# testing-keyworded rather than stable. Upstream's `mcp` extra also pins
+# httpx2 and a CVE-2026-48710-patched starlette for the mcp>=2.0 HTTP stack;
+# those two are deliberately NOT added here because the GURU mcp ebuild
+# available at the time of writing is 1.28.1 (pre-2.0), which still builds
+# on plain dev-python/httpx and is satisfied by ::gentoo's
+# dev-python/starlette-1.3.1 (already patched, already a transitive dep here
+# regardless of this flag). Revisit if/when GURU packages mcp>=2.0.
 RDEPEND+="$(python_gen_cond_dep '
 	azure? (
 		dev-python/azure-identity[${PYTHON_USEDEP}]
 	)
 	firecrawl? (
 		dev-python/firecrawl-py[${PYTHON_USEDEP}]
+	)
+	mcp? (
+		dev-python/mcp[${PYTHON_USEDEP}]
 	)
 	otlp? (
 		dev-python/opentelemetry-exporter-otlp-proto-http[${PYTHON_USEDEP}]
