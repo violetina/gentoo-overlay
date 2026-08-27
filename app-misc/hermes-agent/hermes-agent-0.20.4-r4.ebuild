@@ -35,7 +35,7 @@ SRC_URI="
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
-IUSE="+azure +firecrawl +mcp +otlp +tui +web"
+IUSE="+azure +firecrawl +mcp +otlp +stt +tui +web"
 
 RESTRICT="
 	web? ( network-sandbox )
@@ -131,6 +131,17 @@ RDEPEND+="
 # on plain dev-python/httpx and is satisfied by ::gentoo's
 # dev-python/starlette-1.3.1 (already patched, already a transitive dep here
 # regardless of this flag). Revisit if/when GURU packages mcp>=2.0.
+#
+# stt: audio capture/playback for CLI voice mode and local speech-to-text.
+# Pulls the sounddevice/numpy/PortAudio capture layer plus the faster-whisper
+# local STT backend (CTranslate2 + tokenizers + onnxruntime + av, all packaged
+# in this overlay as prebuilt-wheel/pure-python ebuilds) so `/voice on` reports
+# an available STT provider without a cloud API key or a user-site pip install.
+# tools/lazy_deps.py pins faster-whisper==1.2.1 / sounddevice==0.5.5 /
+# numpy==2.4.3, but that pin is a lazy-install detail; the tree owns versions
+# here (faster-whisper 1.2.1 does not exist on PyPI — 1.2.0 is latest), so the
+# pin is unpinned to presence-only in src_prepare, matching the anthropic/otlp
+# handling.
 RDEPEND+="$(python_gen_cond_dep '
 	azure? (
 		dev-python/azure-identity[${PYTHON_USEDEP}]
@@ -144,6 +155,11 @@ RDEPEND+="$(python_gen_cond_dep '
 	otlp? (
 		dev-python/opentelemetry-exporter-otlp-proto-http[${PYTHON_USEDEP}]
 		dev-python/opentelemetry-sdk[${PYTHON_USEDEP}]
+	)
+	stt? (
+		dev-python/numpy[${PYTHON_USEDEP}]
+		dev-python/sounddevice[numpy,${PYTHON_USEDEP}]
+		dev-python/faster-whisper[${PYTHON_USEDEP}]
 	)
 ')"
 BDEPEND="
@@ -215,6 +231,7 @@ src_prepare() {
 	use azure && unpin+=( azure-identity )
 	use firecrawl && unpin+=( firecrawl-py )
 	use otlp && unpin+=( opentelemetry-sdk opentelemetry-exporter-otlp-proto-http )
+	use stt && unpin+=( faster-whisper sounddevice numpy )
 	for spec in "${unpin[@]}"; do
 		grep -q "\"${spec}==" tools/lazy_deps.py ||
 			die "no pinned ${spec} spec in lazy_deps.py -- did upstream restructure LAZY_DEPS?"
