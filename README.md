@@ -103,15 +103,19 @@ dev-python/av ~amd64
 
 ### package.use
 
-Hermes' TTS path shells out to ffmpeg to produce MP3. `media-video/ffmpeg`
-has no MP3 encoder unless built with `lame`; without it, TTS fails at
-*runtime* (not merge time) with:
+`app-misc/hermes-agent[tts]` (default-on) now RDEPENDs on
+`media-video/ffmpeg[lame]` directly, so Portage's autounmask machinery
+prompts for this automatically at merge time — you shouldn't need to add
+it by hand on a fresh system. Documented here anyway because the
+resulting ffmpeg rebuild is non-obvious and, if `tts` is ever disabled,
+you're back to the old runtime failure mode instead:
 
 ```
 Default encoder for format mp3 (codec mp3) is probably disabled
 ```
 
-`/etc/portage/package.use/hermes-agent`:
+`/etc/portage/package.use/hermes-agent` (or accept whatever Portage's
+autounmask-write proposes):
 
 ```
 media-video/ffmpeg lame

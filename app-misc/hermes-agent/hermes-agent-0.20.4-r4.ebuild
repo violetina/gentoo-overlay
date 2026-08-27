@@ -35,7 +35,7 @@ SRC_URI="
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
-IUSE="+azure +firecrawl +mcp +otlp +stt +tui +web"
+IUSE="+azure +firecrawl +mcp +otlp +stt +tts +tui +web"
 
 RESTRICT="
 	web? ( network-sandbox )
@@ -162,6 +162,23 @@ RDEPEND+="$(python_gen_cond_dep '
 		dev-python/faster-whisper[${PYTHON_USEDEP}]
 	)
 ')"
+# tts: text-to-speech audio output. The delivery path pipes synthesized
+# audio through the ffmpeg binary and defaults to MP3, which needs
+# libmp3lame -- media-video/ffmpeg does NOT build an MP3 encoder unless
+# USE=lame is set. Without it, TTS fails at *runtime*, long after merge,
+# with "Default encoder for format mp3 (codec mp3) is probably disabled".
+# Depending on ffmpeg[lame] here converts that late, confusing failure
+# into a normal autounmask-and-rebuild prompt at merge time.
+#
+# Not a Python package, so it lives outside python_gen_cond_dep. Only the
+# default MP3 path needs lame; an explicit .wav output_path works without
+# it. Provider SDKs (piper-tts, elevenlabs, mistralai for tts.mistral/
+# tts.edge/tts.elevenlabs in tools/lazy_deps.py, ...) are deliberately left
+# to upstream's lazy-install path -- this flag covers only the ffmpeg
+# plumbing every TTS provider shares.
+RDEPEND+="
+	tts? ( media-video/ffmpeg[lame] )
+"
 BDEPEND="
 	web? ( >=net-libs/nodejs-22.22.0 )
 	tui? ( >=net-libs/nodejs-22.22.0 )
@@ -394,6 +411,14 @@ pkg_postinst() {
 		ewarn "'npm ci' against the npm registry during src_compile, which is"
 		ewarn "why they carry RESTRICT=network-sandbox. Enable the flags to"
 		ewarn "build them."
+	fi
+
+	if ! use tts; then
+		ewarn "Built without tts: media-video/ffmpeg[lame] is not enforced."
+		ewarn "Hermes' TTS delivery path shells out to ffmpeg for MP3 encoding"
+		ewarn "and will fail at runtime (not merge time) with \"Default encoder"
+		ewarn "for format mp3 (codec mp3) is probably disabled\" unless ffmpeg"
+		ewarn "already has USE=lame from elsewhere."
 	fi
 
 	elog "Bundled locales, skills, optional-skills and optional-mcps are"
