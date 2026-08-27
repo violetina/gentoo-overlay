@@ -29,6 +29,109 @@ Live ebuilds (`*-9999`) need `ACCEPT_KEYWORDS="**"` for that package, e.g. in
 =dev-util/codex-desktop-linux-9999 **
 ```
 
+## Machine-local prerequisites
+
+Some packages here — mainly `app-misc/hermes-agent` and its optional USE
+flags — need `/etc/portage` config that can't be shipped inside the overlay
+itself. A fresh checkout will fail to build (or fail at runtime, in the
+ffmpeg case) until these are replicated by hand.
+
+### GURU overlay
+
+`dev-python/av` (needed by `dev-python/faster-whisper`, hence by
+`app-misc/hermes-agent[stt]`) and `dev-python/mcp` +
+`dev-python/httpx-sse` + `dev-python/sse-starlette` (needed by
+`app-misc/hermes-agent[mcp]`) live in GURU, not `::gentoo`:
+
+```sh
+sudo eselect repository enable guru
+sudo emaint sync --repo guru
+```
+
+### package.accept_keywords
+
+Everything in this overlay, plus a handful of its `::gentoo`/GURU
+dependencies, is keyworded `~amd64`. On a stable system (`ACCEPT_KEYWORDS
+= amd64`) unmask them — filenames below are arbitrary, only contents
+matter.
+
+`/etc/portage/package.accept_keywords/hermes-agent`:
+
+```
+>=app-misc/hermes-agent-0.20.4 ~amd64
+>=dev-python/cryptography-50.0.0::gentoo ~amd64
+>=dev-python/fastapi-0.140.7::gentoo ~amd64
+dev-python/pyopenssl ~amd64
+dev-python/openai ~amd64
+dev-python/fire ~amd64
+dev-python/jiter ~amd64
+dev-python/anthropic ~amd64
+>=dev-python/docstring-parser-0.18.0::gentoo ~amd64
+dev-python/firecrawl-py ~amd64
+dev-python/azure-core ~amd64
+dev-python/msal ~amd64
+dev-python/msal-extensions ~amd64
+dev-python/azure-identity ~amd64
+dev-python/opentelemetry-proto ~amd64
+dev-python/opentelemetry-exporter-otlp-proto-common ~amd64
+dev-python/opentelemetry-exporter-otlp-proto-http ~amd64
+dev-python/sounddevice ~amd64
+```
+
+`/etc/portage/package.accept_keywords/hermes-agent-mcp` (only needed for
+`app-misc/hermes-agent[mcp]`):
+
+```
+dev-python/mcp ~amd64
+dev-python/httpx-sse ~amd64
+dev-python/sse-starlette ~amd64
+```
+
+`/etc/portage/package.accept_keywords/hermes-agent-stt` (only needed for
+`app-misc/hermes-agent[stt]` — the local, offline faster-whisper voice
+stack):
+
+```
+dev-python/hf-xet ~amd64
+dev-python/huggingface-hub ~amd64
+dev-python/tokenizers ~amd64
+dev-python/ctranslate2 ~amd64
+dev-python/onnxruntime ~amd64
+dev-python/faster-whisper ~amd64
+dev-python/av ~amd64
+```
+
+### package.use
+
+Hermes' TTS path shells out to ffmpeg to produce MP3. `media-video/ffmpeg`
+has no MP3 encoder unless built with `lame`; without it, TTS fails at
+*runtime* (not merge time) with:
+
+```
+Default encoder for format mp3 (codec mp3) is probably disabled
+```
+
+`/etc/portage/package.use/hermes-agent`:
+
+```
+media-video/ffmpeg lame
+```
+
+### Verify the voice/STT stack
+
+```sh
+PYTHONNOUSERSITE=1 python3.14 - <<'PY'
+import tools.voice_mode as v
+print(v.check_voice_requirements()["details"])
+PY
+```
+
+Expect `Audio capture: OK` and `STT provider: OK (local faster-whisper)`.
+`app-misc/hermes-agent[stt]` downloads the configured Whisper model
+(`stt.local.model` in `~/.hermes/config.yaml`, default `base`, ~140 MB)
+from the Hugging Face Hub on first use and caches it under
+`~/.cache/huggingface`.
+
 ## What's in here
 
 | Package | What | Notes |
